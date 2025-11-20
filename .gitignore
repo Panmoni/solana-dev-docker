@@ -1,0 +1,7 @@
+# Ignore environment files with secrets
+.env
+
+# Ignore backup files
+*.tar.gz
+backups/
+

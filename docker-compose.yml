@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  solana-dev:
+    container_name: solana-dev-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: solana-dev-workspace:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      SOLANA_CLUSTER: ${SOLANA_CLUSTER:-devnet}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-}
+    mem_limit: ${SOLANA_DEV_MEMORY:-4g}
+    cpus: ${SOLANA_DEV_CPUS:-2.0}
+    volumes:
+      - ${SOLANA_WORKSPACE_DIR:-~/solana-workspace}:/home/solana
+    working_dir: /home/solana
+    user: solana
+    stop_grace_period: 1m
+    healthcheck:
+      test: ["CMD-SHELL", "id solana && test -d /home/solana"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
