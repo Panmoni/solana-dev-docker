@@ -1,10 +1,10 @@
 # Solana Development Docker Environment
 
-A minimal, persistent Docker container for Solana development on Ubuntu 25.04.
+A minimal, persistent Docker container for Solana development on Ubuntu 25.10.
 
 ## Features
 
-- ✅ Ubuntu 25.04 base image pinned to a digest
+- ✅ Ubuntu 25.10 base image pinned to a digest
 - ✅ Persistent workspace at `SOLANA_WORKSPACE_DIR` (defaults to `~/solana-workspace`)
 - ✅ Auto-restart on failure
 - ✅ Starts on system boot
@@ -14,7 +14,7 @@ A minimal, persistent Docker container for Solana development on Ubuntu 25.04.
 
 ## Prerequisites
 
-- Ubuntu 25.04 VPS or local machine
+- Ubuntu 25.10 VPS or local machine
 - Docker and Docker Compose installed
 
 ### Install Docker (if not already installed)
@@ -84,7 +84,7 @@ chmod +x scripts/*.sh
 
 This will:
 - Create the `SOLANA_WORKSPACE_DIR` directory (defaults to `~/solana-workspace`)
-- Build/pull the pinned Ubuntu 25.04 image
+- Build/pull the pinned Ubuntu 25.10 image
 - Start the container with auto-restart enabled
 
 ### 5. Access Container
@@ -360,7 +360,7 @@ docker compose down
 rm -rf ~/solana-workspace
 
 # Remove Docker image
-docker rmi ubuntu:25.04
+docker rmi ubuntu:25.10
 
 # Start fresh
 ./scripts/setup.sh
@@ -531,7 +531,7 @@ docker compose down
 rm -rf ~/solana-workspace
 
 # Remove Docker image
-docker rmi ubuntu:25.04
+docker rmi ubuntu:25.10
 
 # Remove repository
 cd ..
@@ -558,7 +558,7 @@ A: `docker compose down && docker compose up -d --force-recreate`
 A: Yes! Each user gets their own `~/solana-workspace` directory.
 
 **Q: Does this work on Mac/Windows?**  
-A: This is optimized for Ubuntu 25.04. For Mac/Windows, use Docker Desktop and adjust paths.
+A: This is optimized for Ubuntu 25.10. For Mac/Windows, use Docker Desktop and adjust paths.
 
 ## Contributing
 

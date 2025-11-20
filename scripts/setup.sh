@@ -51,7 +51,7 @@ if [ ! -f "${REPO_ROOT}/.env" ] && [ -f "${REPO_ROOT}/env.example" ]; then
   log "No .env found; copied defaults from env.example"
 fi
 
-log "Building Ubuntu 25.04 Solana workspace image"
+log "Building Ubuntu 25.10 Solana workspace image"
 (cd "$REPO_ROOT" && $COMPOSE_BIN build --pull solana-dev)
 
 log "Starting container in background"
