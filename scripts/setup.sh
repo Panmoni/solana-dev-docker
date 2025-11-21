@@ -12,7 +12,7 @@ if [ -f "$ENV_FILE" ]; then
   set +a
 fi
 
-WORKSPACE="${SOLANA_WORKSPACE_DIR:-${HOME}/solana-workspace}"
+VOLUME_NAME="${SOLANA_VOLUME_NAME:-solana-workspace}"
 
 log() {
   printf '→ %s\n' "$1"
@@ -34,17 +34,7 @@ if ! docker info >/dev/null 2>&1; then
   exit 1
 fi
 
-if [[ "$WORKSPACE" != /* ]]; then
-  echo "✗ SOLANA_WORKSPACE_DIR must be an absolute path. Current value: $WORKSPACE" >&2
-  exit 1
-fi
-
-if [ ! -d "$WORKSPACE" ]; then
-  mkdir -p "$WORKSPACE"
-  log "Created workspace directory at $WORKSPACE"
-else
-  log "Workspace directory already exists"
-fi
+# Note: Workspace is now stored in a Docker volume, not a host directory
 
 if [ ! -f "${REPO_ROOT}/.env" ] && [ -f "${REPO_ROOT}/env.example" ]; then
   cp "${REPO_ROOT}/env.example" "${REPO_ROOT}/.env"
@@ -62,4 +52,5 @@ echo ""
 echo "Access the container with:"
 echo "  docker compose exec solana-dev bash"
 echo ""
-echo "Your work persists at: $WORKSPACE"
+echo "Your work persists in Docker volume: $VOLUME_NAME"
+echo "View volume location: docker volume inspect $VOLUME_NAME"

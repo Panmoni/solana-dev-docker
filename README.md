@@ -5,7 +5,7 @@ A minimal, persistent Docker container for Solana development on Ubuntu 25.10.
 ## Features
 
 - ✅ Ubuntu 25.10 base image pinned to a digest
-- ✅ Persistent workspace at `SOLANA_WORKSPACE_DIR` (defaults to `~/solana-workspace`)
+- ✅ Persistent workspace stored in Docker volume (defaults to `solana-workspace`)
 - ✅ Auto-restart on failure
 - ✅ Starts on system boot
 - ✅ Data survives container deletion
@@ -64,12 +64,12 @@ cd solana-dev-docker
 ### 2. Configure Environment
 
 ```bash
-cp .env.example .env
+cp env.example .env
 nano .env  # or your editor of choice
 ```
 
 Key values:
-- `SOLANA_WORKSPACE_DIR`: absolute host path that should persist Solana projects.
+- `SOLANA_VOLUME_NAME`: Docker volume name for persistent workspace (defaults to `solana-workspace`).
 - `SOLANA_DEV_MEMORY` / `SOLANA_DEV_CPUS`: optional Docker resource limits.
 - `SOLANA_CLUSTER` / `SOLANA_RPC_URL`: Solana network defaults inside the container.
 
@@ -86,7 +86,7 @@ chmod +x scripts/*.sh
 ```
 
 This will:
-- Create the `SOLANA_WORKSPACE_DIR` directory (defaults to `~/solana-workspace`)
+- Create the Docker volume for persistent workspace storage
 - Build/pull the pinned Ubuntu 25.10 image
 - Start the container with auto-restart enabled
 
@@ -124,14 +124,14 @@ yarn --version
 
 ### 7. Start Developing!
 
-Your workspace is at `/home/solana` inside the container, which maps to `~/solana-workspace` on your host.
+Your workspace is at `/home/solana` inside the container, stored in a Docker volume that persists across container restarts.
 
 ```bash
 # Create a new project
 mkdir my-solana-project
 cd my-solana-project
 
-# Your work is automatically saved to ~/solana-workspace on the host
+# Your work is automatically persisted in the Docker volume
 ```
 
 ## Daily Usage
@@ -174,20 +174,7 @@ docker compose ps
 
 ## Working with Files
 
-> Wherever you see `~/solana-workspace`, substitute the value of `SOLANA_WORKSPACE_DIR` from your `.env`. The default remains `~/solana-workspace`.
-
-### From Host Machine
-
-Your files are accessible at `~/solana-workspace`:
-
-```bash
-# List files
-ls ~/solana-workspace
-
-# Edit with your favorite editor
-code ~/solana-workspace  # VS Code
-vim ~/solana-workspace/my-file.rs
-```
+Your workspace is stored in a Docker volume, which persists data even if the container is deleted. The volume is mounted at `/home/solana` inside the container.
 
 ### From Inside Container
 
@@ -199,6 +186,28 @@ cd /home/solana
 ls -la
 ```
 
+### Accessing Files from Host Machine
+
+To access files from the host, you can copy them from the volume:
+
+```bash
+# Copy a file from the volume to your host
+docker compose exec solana-dev cat /home/solana/my-file.rs > ~/my-file.rs
+
+# Or use docker cp
+docker cp solana-dev-container:/home/solana/my-file.rs ~/my-file.rs
+
+# View volume location and details
+docker volume inspect solana-workspace
+```
+
+Alternatively, you can mount the volume temporarily to access files directly:
+
+```bash
+# Create a temporary container to access volume files
+docker run --rm -v solana-workspace:/workspace ubuntu:25.10 ls -la /workspace
+```
+
 ## Backup & Restore
 
 ### Create Backup
@@ -207,7 +216,7 @@ ls -la
 ./scripts/backup.sh
 ```
 
-This script reads `.env`, snapshots everything in `SOLANA_WORKSPACE_DIR`, and drops the archive under `backups/` inside the repo:
+This script reads `.env`, snapshots everything in the Docker volume, and drops the archive under `backups/` inside the repo:
 ```
 backups/solana-workspace-backup-20241118_143022.tar.gz
 ```
@@ -224,7 +233,7 @@ ls -lh backups/
 ./scripts/restore.sh backups/solana-workspace-backup-YYYYMMDD_HHMMSS.tar.gz
 ```
 
-⚠️ **Warning**: This will overwrite whatever path you configured in `SOLANA_WORKSPACE_DIR`. The script removes the directory entirely before unpacking the archive.
+⚠️ **Warning**: This will overwrite the contents of the Docker volume. The script removes all existing data in the volume before restoring.
 
 ### Automated Backups (Optional)
 
@@ -256,14 +265,15 @@ docker compose up -d --force-recreate
 docker compose down
 ```
 
-Your data in `~/solana-workspace` is preserved.
+Your data in the Docker volume is preserved.
 
 ### Remove Container AND Data (⚠️ Destructive)
 
 ```bash
-docker compose down
-rm -rf ~/solana-workspace
+docker compose down -v
 ```
+
+This removes both the container and the associated volume. All data will be lost.
 
 ### View Container Resource Usage
 
@@ -294,12 +304,7 @@ docker compose ps
 
 ### Permission Issues
 
-Fix ownership of workspace:
-```bash
-sudo chown -R $USER:$USER ~/solana-workspace
-```
-
-Inside container, fix permissions:
+Fix permissions inside container:
 ```bash
 docker compose exec solana-dev bash
 sudo chown -R solana:solana /home/solana
@@ -356,11 +361,8 @@ docker system prune -a
 Complete reset (⚠️ destroys all data):
 
 ```bash
-# Stop and remove container
-docker compose down
-
-# Remove workspace
-rm -rf ~/solana-workspace
+# Stop and remove container and volume
+docker compose down -v
 
 # Remove Docker image
 docker rmi ubuntu:25.10
@@ -388,15 +390,21 @@ docker compose exec solana-dev cat /home/solana/test.txt
 # Should output: test
 ```
 
-### Test 2: Host-Container Sync
+### Test 2: Volume Persistence
 
 ```bash
-# Create file on host
-echo "from host" > ~/solana-workspace/host-test.txt
+# Create file in container
+docker compose exec solana-dev bash -c "echo 'from container' > /home/solana/volume-test.txt"
 
-# Read from container
-docker compose exec solana-dev cat /home/solana/host-test.txt
-# Should output: from host
+# Stop and remove container (but keep volume)
+docker compose down
+
+# Start container again
+docker compose up -d
+
+# Check file still exists in volume
+docker compose exec solana-dev cat /home/solana/volume-test.txt
+# Should output: from container
 ```
 
 ### Test 3: Auto-Restart
@@ -438,12 +446,12 @@ solana balance ~/test-keypair.json
 
 Copy the example environment file:
 ```bash
-cp .env.example .env
+cp env.example .env
 ```
 
 Edit `.env` to customize defaults for all students. Example:
 ```bash
-SOLANA_WORKSPACE_DIR=/home/ubuntu/solana-workspace
+SOLANA_VOLUME_NAME=solana-workspace
 SOLANA_DEV_MEMORY=4g
 SOLANA_DEV_CPUS=2.0
 SOLANA_CLUSTER=devnet
@@ -492,7 +500,7 @@ docker compose up -d --force-recreate
 
 3. **Backup your keypairs separately**
    ```bash
-   cp ~/solana-workspace/*.json /secure/backup/location/
+   docker compose exec solana-dev bash -c "cp /home/solana/*.json /tmp/" && docker cp solana-dev-container:/tmp/ ~/keypair-backup/
    ```
 
 4. **Keep Docker updated**
@@ -527,11 +535,8 @@ docker compose down
 ### Remove Everything
 
 ```bash
-# Stop and remove container
-docker compose down
-
-# Remove workspace
-rm -rf ~/solana-workspace
+# Stop and remove container and volume
+docker compose down -v
 
 # Remove Docker image
 docker rmi ubuntu:25.10
@@ -544,21 +549,19 @@ rm -rf solana-dev-docker
 ## FAQ
 
 **Q: Where is my data stored?**  
-A: On your host at `~/solana-workspace`, mapped to `/home/solana` in the container.
+A: In a Docker volume (default name: `solana-workspace`), mounted at `/home/solana` inside the container. Use `docker volume inspect solana-workspace` to see the physical location on your host.
 
 **Q: Will my data survive if I delete the container?**  
-A: Yes! Data in `~/solana-workspace` persists even after `docker compose down`.
+A: Yes! Data in the Docker volume persists even after `docker compose down`. The volume is only removed if you use `docker compose down -v`.
 
 **Q: Can I use VS Code with this setup?**  
-A: Yes! Either:
-- Edit files directly in `~/solana-workspace` on your host
-- Use VS Code Remote-Containers extension
+A: Yes! Use VS Code Remote-Containers extension to work directly inside the container, or copy files to/from the volume as needed.
 
 **Q: How do I update the container?**  
 A: `docker compose down && docker compose up -d --force-recreate`
 
 **Q: Can multiple people use this setup?**  
-A: Yes! Each user gets their own `~/solana-workspace` directory.
+A: Yes! Each user can create their own volume by setting `SOLANA_VOLUME_NAME` in their `.env` file.
 
 **Q: Does this work on Mac/Windows?**  
 A: This is optimized for Ubuntu 25.10. For Mac/Windows, use Docker Desktop and adjust paths.
