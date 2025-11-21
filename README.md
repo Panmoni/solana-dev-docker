@@ -17,6 +17,8 @@ A minimal, persistent Docker container for Solana development on Ubuntu 25.10.
 - Ubuntu 25.10 VPS or local machine
 - Docker and Docker Compose installed
 
+> **Note on Docker Installation**: Ubuntu 25.10 is a very new release, and Docker's official repository doesn't yet have packages specifically for it. The installation instructions below use the Ubuntu 24.04 LTS (noble) repository, which is fully compatible with Ubuntu 25.10. This is a safe and recommended workaround until Docker adds official support for Ubuntu 25.10.
+
 ### Install Docker (if not already installed)
 
 ```bash
@@ -28,9 +30,10 @@ sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyring
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 # Add the repository to Apt sources
+# Note: Using 'noble' (Ubuntu 24.04 LTS) repository as Docker doesn't yet support Ubuntu 25.10
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  noble stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # Install Docker
