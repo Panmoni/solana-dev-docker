@@ -360,9 +360,27 @@ Clean up unused Docker resources:
 docker system prune -a
 ```
 
-### Reset Everything
+### Complete Destruction (⚠️ Destructive)
 
-Complete reset (⚠️ destroys all data):
+To completely remove everything (container, volume, image, network) and start fresh:
+
+```bash
+./scripts/destroy.sh
+```
+
+This script will:
+- Stop and remove the container
+- Remove the Docker volume (⚠️ **ALL YOUR WORK WILL BE LOST!**)
+- Remove the Docker image
+- Remove the Docker network
+
+**Warning:** This permanently deletes all data in the volume. Make sure you've backed up anything important with `./scripts/backup.sh` first.
+
+The script requires you to type `yes` to confirm before proceeding.
+
+### Reset Everything (Manual)
+
+Alternatively, you can do it manually:
 
 ```bash
 # Stop and remove container and volume
