@@ -18,9 +18,9 @@ RUN useradd -m -s /bin/bash solana && \
     echo 'solana ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     chown -R solana:solana /home/solana && \
     echo '' >> /home/solana/.bashrc && \
-    echo '# Source .profile if it exists (for Solana CLI and other tools)' >> /home/solana/.bashrc && \
-    echo 'if [ -f "$HOME/.profile" ]; then' >> /home/solana/.bashrc && \
-    echo '    source "$HOME/.profile"' >> /home/solana/.bashrc && \
+    echo '# Add Solana CLI to PATH if installed' >> /home/solana/.bashrc && \
+    echo 'if [ -d "$HOME/.local/share/solana/install/active_release/bin" ]; then' >> /home/solana/.bashrc && \
+    echo '    export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"' >> /home/solana/.bashrc && \
     echo 'fi' >> /home/solana/.bashrc
 
 WORKDIR /home/solana
