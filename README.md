@@ -106,6 +106,8 @@ Inside the container, run:
 curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
 ```
 
+Ref: https://solana.com/docs/intro/installation
+
 Reload your shell configuration:
 
 ```bash
