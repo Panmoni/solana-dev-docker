@@ -16,7 +16,12 @@ RUN apt-get update && \
 
 RUN useradd -m -s /bin/bash solana && \
     echo 'solana ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
-    chown -R solana:solana /home/solana
+    chown -R solana:solana /home/solana && \
+    echo '' >> /home/solana/.bashrc && \
+    echo '# Source .profile if it exists (for Solana CLI and other tools)' >> /home/solana/.bashrc && \
+    echo 'if [ -f "$HOME/.profile" ]; then' >> /home/solana/.bashrc && \
+    echo '    source "$HOME/.profile"' >> /home/solana/.bashrc && \
+    echo 'fi' >> /home/solana/.bashrc
 
 WORKDIR /home/solana
 USER solana

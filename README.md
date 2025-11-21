@@ -114,6 +114,8 @@ Reload your shell configuration:
 source ~/.bashrc
 ```
 
+**Note:** The container is configured to automatically source `~/.profile` from `~/.bashrc`, so after installing Solana tools, simply run `source ~/.bashrc` (or exit and re-enter the container) and the Solana CLI will be available.
+
 Verify installation:
 
 ```bash
