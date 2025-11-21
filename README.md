@@ -602,6 +602,19 @@ A: Yes! Each user can create their own volume by setting `SOLANA_VOLUME_NAME` in
 **Q: Does this work on Mac/Windows?**  
 A: This is optimized for Ubuntu 25.10. For Mac/Windows, use Docker Desktop and adjust paths.
 
+## VS Code Theme
+
+This repository includes a custom Docker-colored VS Code theme that automatically applies when you open the workspace. The theme features:
+
+- **Docker Blue** (`#0db7ed`) accents throughout the interface
+- **Dark background** optimized for extended coding sessions
+- **Syntax highlighting** with Docker-themed colors for keywords, functions, and types
+- **Customized UI elements** including status bar, activity bar, and tabs in Docker colors
+
+The theme is configured in `.vscode/settings.json` and will be automatically applied when you open this workspace in VS Code. No additional installation or configuration is required.
+
+If you prefer to use a different theme, you can override it in your user settings or modify `.vscode/settings.json`.
+
 ## Contributing
 
 Issues and pull requests welcome!
