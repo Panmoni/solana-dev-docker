@@ -142,9 +142,23 @@ cd my-solana-project
 
 ### Access Container Shell
 
+From within the repository directory:
 ```bash
 docker compose exec solana-dev bash
 ```
+
+From anywhere on your system:
+```bash
+docker exec -it solana-dev-container bash
+```
+
+For convenience, add an alias to access the container from anywhere:
+```bash
+echo 'alias solana-dev="docker exec -it solana-dev-container bash"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Then you can simply run `solana-dev` from any directory.
 
 ### Start Container (if stopped)
 
